@@ -49,6 +49,7 @@ function MovementProvider({ children }) {
 
     try {
       const { data, status } = await service.verify();
+
       if (status === 200) {
         setCurrentUser(data);
         setIsLoggedIn(true);
@@ -56,7 +57,7 @@ function MovementProvider({ children }) {
         setIsLoggedIn(false);
         setCurrentUser(null);
       }
-    } catch {
+    } catch (error) {
       setIsLoggedIn(false);
       setCurrentUser(null);
     }

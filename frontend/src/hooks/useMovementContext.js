@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { MovementContext } from "../context/movementContext";
+import { MovementContext } from "../context/MovementContext";
 
 // Define a custom hook to access the context
 const useMovementContext = () => {
