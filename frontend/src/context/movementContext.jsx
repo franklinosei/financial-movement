@@ -5,18 +5,12 @@ import { service } from "../services/services";
 const MovementContext = createContext({});
 
 function MovementProvider({ children }) {
-  // State variables to manage loading state, authentication status, and current user.
   const [isLoading, setIsLoading] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [movements, setMovements] = useState([]);
+  const [capital, setCapital] = useState([]);
 
-  /**
-   * handleError handles errors globally across the authentication methods.
-   * It shows a toast message to the user and resets the loading state.
-   *
-   * @param {Error} error - The error object, typically from an API response.
-   * @param {string} [defaultMessage] - The fallback message if no specific error message is found.
-   */
   const handleError = (
     error,
     defaultMessage = "Couldn't process your request, please try again!"
@@ -28,17 +22,8 @@ function MovementProvider({ children }) {
     setIsLoading(false);
   };
 
-  /**
-   * storeToken saves the JWT token to local storage.
-   *
-   * @param {string} token - The authentication token to be saved.
-   */
   const storeToken = (token) => localStorage.setItem("authToken", token);
 
-  /**
-   * authenticate checks if the user is authenticated by verifying the token stored in local storage.
-   * If valid, the user’s information is loaded; otherwise, the user is considered logged out.
-   */
   const authenticate = async () => {
     const cachedToken = localStorage.getItem("authToken");
     if (!cachedToken) {
@@ -49,7 +34,6 @@ function MovementProvider({ children }) {
 
     try {
       const { data, status } = await service.verify();
-
       if (status === 200) {
         setCurrentUser(data);
         setIsLoggedIn(true);
@@ -63,14 +47,6 @@ function MovementProvider({ children }) {
     }
   };
 
-  /**
-   * handleResponse handles successful responses from API calls.
-   * It displays a success toast and returns true if the response is valid.
-   *
-   * @param {Object} response - The API response object.
-   * @param {string} [successMessage] - Optional custom success message for the toast notification.
-   * @returns {boolean} - Returns true if the response was successful (status 200–299).
-   */
   const handleResponse = async (response, successMessage) => {
     if (response.status >= 200 && response.status < 300) {
       toast.success(successMessage ?? response.data.message, {
@@ -81,12 +57,6 @@ function MovementProvider({ children }) {
     throw new Error(response?.data?.message);
   };
 
-  /**
-   * login logs the user in with their email and password by calling the authentication service.
-   * On success, it stores the token and authenticates the user.
-   *
-   * @param {Object} credentials - The user’s login credentials (email and password).
-   */
   const login = async (credentials) => {
     setIsLoading(true);
     try {
@@ -102,12 +72,6 @@ function MovementProvider({ children }) {
     }
   };
 
-  /**
-   * signUpUser registers a new user and logs them in.
-   * If successful, the token is stored, and the user is authenticated.
-   *
-   * @param {Object} userData - The user’s sign-up data (e.g., email, password).
-   */
   const signUpUser = async (userData) => {
     setIsLoading(true);
     try {
@@ -123,16 +87,55 @@ function MovementProvider({ children }) {
     }
   };
 
-  /**
-   * logOutUser logs the user out by clearing their authentication token.
-   * It also clears the user’s session and re-authenticates.
-   */
   const logOutUser = () => {
-    service.logout();
-    authenticate();
+    localStorage.removeItem("authToken");
+    setIsLoggedIn(false);
+    setCurrentUser(null);
   };
 
-  // Automatically authenticate the user on the first render (e.g., after a page reload).
+  // Movement-related methods
+  const fetchMovements = async () => {
+    setIsLoading(true);
+    try {
+      const response = await service.getAllMovements();
+      if (handleResponse(response, "Movements fetched successfully")) {
+        setMovements(response.data.movements);
+      }
+    } catch (error) {
+      handleError(error, "Failed to fetch movements.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const addMovement = async (movementData) => {
+    setIsLoading(true);
+    try {
+      const response = await service.addMovement(movementData);
+      if (handleResponse(response, "Movement added successfully")) {
+        setMovements((prev) => [...prev, response.data]);
+      }
+    } catch (error) {
+      handleError(error, "Failed to add movement.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchCapital = async () => {
+    setIsLoading(true);
+    try {
+      const response = await service.getCapital();
+      if (handleResponse(response, "Capital fetched successfully")) {
+        setCapital(response.data.capital);
+      }
+    } catch (error) {
+      handleError(error, "Failed to fetch capital.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     authenticate();
   }, []);
@@ -143,9 +146,14 @@ function MovementProvider({ children }) {
         isLoading,
         isLoggedIn,
         currentUser,
+        movements,
+        capital,
         login,
         signUpUser,
         logOutUser,
+        fetchMovements,
+        addMovement,
+        fetchCapital,
       }}
     >
       {children}

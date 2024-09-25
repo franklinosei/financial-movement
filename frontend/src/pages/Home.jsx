@@ -11,7 +11,7 @@ function Home() {
       <h1 className="text-2xl font-bold text-black">
         Financial Movement Manager
       </h1>
-      <CapitalDisplay capital={capital} />
+      <CapitalDisplay />
       <MovementFormModal addMovement={addMovement} />
       <MovementsTable movements={movements} />
     </div>

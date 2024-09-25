@@ -1,4 +1,13 @@
-const MovementsTable = ({ movements }) => {
+import { useEffect } from "react";
+import { useMovementContext } from "../hooks/useMovementContext";
+
+const MovementsTable = () => {
+  const { movements, fetchMovements } = useMovementContext();
+
+  useEffect(() => {
+    fetchMovements();
+  }, []);
+
   return (
     <div className="mt-4 w-full text-black">
       <h2 className="text-lg font-bold">Financial Movements</h2>
