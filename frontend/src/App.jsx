@@ -1,18 +1,19 @@
-import MovementsTable from "./components/MovementsTable";
-import MovementFormModal from "./components/MovementFormModal";
-import CapitalDisplay from "./components/CapitalDisplay";
-import useMovements from "./hooks/useMovements";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import Home from "./pages/Home";
 
 function App() {
-  const { movements, capital, addMovement } = useMovements();
-
   return (
-    <div className="p-4 bg-zinc-100 w-[100vw] h-[100vh]">
-      <h1 className="text-2xl font-bold text-black">Financial Movement Manager</h1>
-      <CapitalDisplay capital={capital} />
-      <MovementFormModal addMovement={addMovement} />
-      <MovementsTable movements={movements} />
-    </div>
+    <Router>
+      <div className="h-screen w-screen text-black">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
